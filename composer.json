@@ -1,0 +1,27 @@
+{
+    "name": "skywarth/laravel-config-mapper",
+    "description": "Auto-mapper for configs, matching env keys",
+    "type": "library",
+    "license": "GPL-3.0-or-later",
+    "autoload": {
+        "psr-4": {
+            "Skywarth\\LaravelConfigMapper\\": "src/laravel-config-mapper"
+        }
+    },
+    "authors": [
+        {
+            "name": "skywarth",
+            "email": "yigitk.ersoy@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Skywarth\\LaravelConfigMapper\\LaravelConfigMapperServiceProvider"
+            ]
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0"
+    }
+}
