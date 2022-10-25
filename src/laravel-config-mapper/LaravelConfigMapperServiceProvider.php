@@ -17,9 +17,10 @@ class LaravelConfigMapperServiceProvider extends ServiceProvider
         $originalConfigFunc=function($str){
             config($str);
         };
-        foreach (glob(app_path().'/Helpers/*.php') as $filename){
+        /*foreach (glob(app_path().'/Helpers/*.php') as $filename){
             require_once($filename);
-        }
+        }*/
+
     }
 
     /**
