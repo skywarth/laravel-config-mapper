@@ -13,7 +13,7 @@
     },
     "authors": [
         {
-            "name": "skywarth",
+            "name": "Yiğit Kürşad Ersoy",
             "email": "yigitk.ersoy@gmail.com"
         }
     ],
@@ -21,8 +21,12 @@
         "laravel": {
             "providers": [
                 "Skywarth\\LaravelConfigMapper\\LaravelConfigMapperServiceProvider"
-            ]
+            ],
+            "aliases": {
+                "ConfigMapper": "Skywarth\\LaravelConfigMapper\\Facades\\ConfigMapper"
+            }
         }
+
     },
     "require-dev": {
         "orchestra/testbench": "^6.0"

@@ -14,12 +14,12 @@ class LaravelConfigMapperServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $originalConfigFunc=function($str){
-            config($str);
-        };
-        /*foreach (glob(app_path().'/Helpers/*.php') as $filename){
-            require_once($filename);
-        }*/
+
+        $this->mergeConfigFrom(__DIR__.'/../../config/config.php', 'laravel-config-mapper');
+        $this->app->bind('ConfigMapper', function($app) {
+            return new ConfigMapper(config('laravel-config-mapper'));
+        });
+
 
     }
 
@@ -31,6 +31,13 @@ class LaravelConfigMapperServiceProvider extends ServiceProvider
     public function boot()
     {
 
+        if ($this->app->runningInConsole()) {
+
+            $this->publishes([
+                __DIR__.'/../../config/config.php' => config_path('laravel-config-mapper.php'),
+            ], 'config');
+
+        }
 
     }
 }

@@ -5,11 +5,17 @@ if (! function_exists('configMapped')) {
     /**
      * Get the path to the application folder.
      *
-     * @param  string  $path
-     * @return string
+     * @param  array|string|null  $key
+     * @param  mixed  $default
+     * @return mixed|\Illuminate\Config\Repository
      */
-    function configMapped()
+    function configMapped($string)
     {
-        dd('dddddd');
+
+        if(config($string)!=='automap'){
+            return config($string);
+        }else{
+            return \ConfigMapper::getMappedConfig($string);
+        }
     }
 }
