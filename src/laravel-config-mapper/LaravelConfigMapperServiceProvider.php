@@ -3,6 +3,7 @@
 namespace Skywarth\LaravelConfigMapper;
 
 use Illuminate\Support\ServiceProvider;
+use Skywarth\LaravelConfigMapper\Console\PublishMappedEnvKeys;
 
 
 class LaravelConfigMapperServiceProvider extends ServiceProvider
@@ -37,6 +38,9 @@ class LaravelConfigMapperServiceProvider extends ServiceProvider
                 __DIR__.'/../../config/config.php' => config_path('laravel-config-mapper.php'),
             ], 'config');
 
+            $this->commands([
+                PublishMappedEnvKeys::class,
+            ]);
         }
 
     }
