@@ -29,6 +29,9 @@ class ConfigMapper
     }
 
     /**
+     * Get the folder delimiter character defined by the configuration
+     * Folder delimiter character is used for separating sub-dirs in mapped env key
+     *
      * @return string
      */
     public function getFolderDelimiterCharacter(): string
@@ -37,6 +40,10 @@ class ConfigMapper
     }
 
     /**
+     * Get the word delimiter character defined by the configuration
+     * Word delimiter character is used for separating words in folder/file/key name.
+     * camelCase, kebab-case and snake_case will be split with defined word delimiter char
+     *
      * @return string
      */
     public function getWordDelimiterCharacter(): string
@@ -45,9 +52,11 @@ class ConfigMapper
     }
 
 
-
-
-
+    /**
+     * @param $key
+     * @return mixed
+     *
+     */
     public function getMappedConfig($key){
         return env($this->getMappedEnvKey($key));
 
@@ -64,13 +73,29 @@ class ConfigMapper
     }
 
     private function replaceWordDelimiters($key){
-        $key=$this->camelToSnake($key);
+        $key=Utility::camelToSnake($key);
         return preg_replace("/[^a-zA-Z0-9{$this->getFolderDelimiterCharacter()}]/", $this->getWordDelimiterCharacter(), $key);
     }
 
-    //https://stackoverflow.com/a/40514305 thanks
-    private function camelToSnake($string, $replaceWith = "#") {
-        return strtolower(preg_replace(
-            '/(?<=\d)(?=[A-Za-z])|(?<=[A-Za-z])(?=\d)|(?<=[a-z])(?=[A-Z])/', $replaceWith, $string));
+
+    public function getAllConfigsArray():array{
+        $config=config();//this gives us all configs as Illuminate\Config\Repository. It includes subdirs too
+        //alternative: Storage::allFiles(config_path());
+        return $config->all();
     }
+
+    //https://stackoverflow.com/a/29612139 thanks
+    public function filterOutNonAutomapConfigs(&$configs) :array{
+        //CAREFUL, notice the ampersand. Updates in place. Unless you are calling from outside
+        foreach ( $configs as $key => $item ) {
+            is_array ( $item ) && $configs[$key] = $this->filterOutNonAutomapConfigs( $item );
+            if ((!is_array($configs[$key]) && $configs[$key]!=='automap')||empty($configs[$key])){
+                unset($configs[$key]);
+            }
+
+        }
+        return $configs;
+    }
+
+
 }
