@@ -17,6 +17,23 @@ class PublishMappedEnvKeys extends Command
     private const ENV_KEYS_BEGIN_INDICATOR = '[AUTOMAP ENV KEYS BEGIN]';
     private const ENV_KEYS_END_INDICATOR = '[AUTOMAP ENV KEYS END]';
 
+    /**
+     * @return string
+     */
+    private function getBeginIndicatorForEnv(): string
+    {
+        return "#".self::ENV_KEYS_BEGIN_INDICATOR." - DON'T ALTER THIS LINE";
+    }
+
+    /**
+     * @return string
+     */
+    private function getEndIndicatorForEnv(): string
+    {
+        return "#".self::ENV_KEYS_END_INDICATOR." - DON'T ALTER THIS LINE";
+    }
+
+
     public function handle()
     {
 
@@ -95,12 +112,10 @@ class PublishMappedEnvKeys extends Command
 
     private function outputMappedEnvKeys(array $normalizedAutomapConfigs){
         $this->info('4. Copy this and paste it to your env, then edit values as you wish:');
-        $beginIndicator=self::ENV_KEYS_BEGIN_INDICATOR;
-        $endIndicator=self::ENV_KEYS_END_INDICATOR;
-        $outputString="#{$beginIndicator} - DON'T DELETE THIS LINE \n";
+        $outputString=''.$this->getBeginIndicatorForEnv()."\n";
         $outputString.=$this->prepareEnvString($normalizedAutomapConfigs);
 
-        $outputString.="\n#{$endIndicator} - DON'T DELETE THIS LINE";
+        $outputString.="\n".$this->getEndIndicatorForEnv();
         $this->info('--------------COPY BELOW--------------');
         $this->line($outputString);
         $this->info('--------------COPY ABOVE--------------');
@@ -108,8 +123,6 @@ class PublishMappedEnvKeys extends Command
     }
 
     private function addMappedEnvKeysToFile(array $normalizedAutomapConfigs,string $filepath){
-        $beginIndicator=self::ENV_KEYS_BEGIN_INDICATOR;
-        $endIndicator=self::ENV_KEYS_END_INDICATOR;
 
         $envStringToPut=$this->prepareEnvString($normalizedAutomapConfigs);
         $envStringToPutArray=explode("\n", $envStringToPut);
@@ -120,49 +133,52 @@ class PublishMappedEnvKeys extends Command
         $beginLine=null;
         $endLine=null;
         foreach ($linesArray as $lineNumber=>$line){
-            if(str_contains($line,$beginIndicator)){
+            if(str_contains($line,self::ENV_KEYS_BEGIN_INDICATOR)){
                 $beginLine=$lineNumber;
-            }else if(str_contains($line,$endIndicator)){
+            }else if(str_contains($line,self::ENV_KEYS_END_INDICATOR)){
                 $endLine=$lineNumber;
                 break;
             }
         }
 
 
-        $lineIterator=$beginLine+1;
-        dump(['lineit'=>$lineIterator,'begin'=>$beginLine,'end'=>$endLine]);
-        while(count($envStringToPutArray)>0){
-            dump($lineIterator);
-            $nextKeyToPut=array_shift($envStringToPutArray);
-            if($lineIterator===$endLine){
-                dump('zz');
-                array_splice($linesArray, $lineIterator, 0, $nextKeyToPut);
-                $endLine++;
-            }else{
-                dump('xx');
-                $linesArray[$lineIterator]=$nextKeyToPut;
+        if(is_null($beginLine) && is_null($endLine)){
+            //means file doesn't contain mapped env keys
+            //just add it to the end of the file
+
+            $linesArray[]=$this->getBeginIndicatorForEnv();
+            $linesArray=array_merge($linesArray,$envStringToPutArray);
+            $linesArray[]=$this->getEndIndicatorForEnv();
+
+        }else{
+            //file already contains some mapped env keys
+            //replace between starting and ending tag
+            $lineIterator=$beginLine+1;
+
+            //dump(['lineit'=>$lineIterator,'begin'=>$beginLine,'end'=>$endLine]);
+            while(count($envStringToPutArray)>0){
+                $nextKeyToPut=array_shift($envStringToPutArray);
+                if($lineIterator===$endLine){
+                    array_splice($linesArray, $lineIterator, 0, $nextKeyToPut);
+                    $endLine++;
+                }else{
+                    $linesArray[$lineIterator]=$nextKeyToPut;
+                }
+                $lineIterator++;
             }
 
-            $lineIterator++;
+            while($lineIterator<$endLine){//to get rid of other lines (existing section is bigger than the new mapped env keys line number)
+                unset($linesArray[$lineIterator]);
+                $lineIterator++;
+            }
         }
 
 
 
 
 
-        dd($linesArray);
-        for($i=0;$i<count($linesArray);$i++){
-            if($i>$beginLine && $i<$endLine){
-                unset($linesArray[$i]);
-            }
-        }
-        $linesArray=array_values($linesArray);//reindex, unset leaves it dirty
-        $endLine=$beginLine+1;
-        dd($linesArray);
-
-        dd(1...3);
-        array_diff_key($linesArray,[$beginLine]);
-        dd([$beginLine,$endLine]);
+        $newContent=implode($linesArray,"\n");
+        file_put_contents($filepath,$newContent);
 
     }
 
