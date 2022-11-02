@@ -92,6 +92,10 @@ class PublishMappedEnvKeys extends Command
             $envExampleFilePath=base_path('.env.example');
 
             $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$envExampleFilePath);
+        } else if($choiceNumber===3){
+            $envExampleFilePath=base_path('.env');
+
+            $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$envExampleFilePath);
         }
 
 
@@ -110,6 +114,18 @@ class PublishMappedEnvKeys extends Command
         return trim($string);
     }
 
+    private function ensureFileExists(string $filepath):bool{
+        if(File::exists($filepath)===false){
+            if($this->confirm("$filepath doesn't exists, would you like it to be created ?",true)){
+                File::put($filepath,'');
+            }else{
+                return false;
+            }
+
+        }
+        return true;
+    }
+
     private function outputMappedEnvKeys(array $normalizedAutomapConfigs){
         $this->info('4. Copy this and paste it to your env, then edit values as you wish:');
         $outputString=''.$this->getBeginIndicatorForEnv()."\n";
@@ -122,7 +138,12 @@ class PublishMappedEnvKeys extends Command
         $this->warn("Don't forget to assign values to your env keys !");
     }
 
-    private function addMappedEnvKeysToFile(array $normalizedAutomapConfigs,string $filepath){
+    private function addMappedEnvKeysToFile(array $normalizedAutomapConfigs,string $filepath):bool{
+        if($this->ensureFileExists($filepath)===false){
+            $this->warn('Selected file path unavailable.');
+            return false;
+        }
+
 
         $envStringToPut=$this->prepareEnvString($normalizedAutomapConfigs);
         $envStringToPutArray=explode("\n", $envStringToPut);
@@ -143,6 +164,7 @@ class PublishMappedEnvKeys extends Command
 
 
         if(is_null($beginLine) && is_null($endLine)){
+            $this->info("File doesn't contain mapped env keys, appending to the end of the file");
             //means file doesn't contain mapped env keys
             //just add it to the end of the file
 
@@ -151,6 +173,7 @@ class PublishMappedEnvKeys extends Command
             $linesArray[]=$this->getEndIndicatorForEnv();
 
         }else{
+            $this->info("File already contains mapped env keys, replacing appropriately");
             //file already contains some mapped env keys
             //replace between starting and ending tag
             $lineIterator=$beginLine+1;
@@ -179,6 +202,7 @@ class PublishMappedEnvKeys extends Command
 
         $newContent=implode($linesArray,"\n");
         file_put_contents($filepath,$newContent);
+        return true;
 
     }
 
