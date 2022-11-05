@@ -6,6 +6,7 @@ namespace Skywarth\LaravelConfigMapper\Console;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Skywarth\LaravelConfigMapper\Facades\ConfigMapper;
 use Skywarth\LaravelConfigMapper\Utility;
 
 class PublishMappedEnvKeys extends Command
@@ -43,17 +44,17 @@ class PublishMappedEnvKeys extends Command
 
         $this->info('Discovering config files');
 
-        $configs=\ConfigMapper::getAllConfigsArray();
+        $configs=ConfigMapper::getAllConfigsArray();
         $automapConfigs=$configs;
 
 
         $this->info('Filtering non-automap configs out');
-        $automapConfigs=\ConfigMapper::filterOutNonAutomapConfigs($automapConfigs);
+        $automapConfigs=ConfigMapper::filterOutNonAutomapConfigs($automapConfigs);
         $normalizedAutomapConfigs=Utility::flatten($automapConfigs);
 
         $configsTableForDisplay=[];
         foreach ($normalizedAutomapConfigs as $configPath=>$value){
-            $mappedEnvKey=\ConfigMapper::getMappedEnvKey($configPath);
+            $mappedEnvKey=ConfigMapper::getMappedEnvKey($configPath);
             $normalizedAutomapConfigs[$configPath]=$mappedEnvKey;
             $configsTableForDisplay[]=[
                 'config_path'=>$configPath,
@@ -89,13 +90,15 @@ class PublishMappedEnvKeys extends Command
         if($choiceNumber===1){
             $this->outputMappedEnvKeys($normalizedAutomapConfigs);
         }else if($choiceNumber===2){
-            $envExampleFilePath=base_path('.env.example');
+            $filePath=base_path('.env.example');
 
-            $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$envExampleFilePath);
+            $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$filePath);
         } else if($choiceNumber===3){
-            $envExampleFilePath=base_path('.env');
+            $filePath=base_path('.env');
 
-            $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$envExampleFilePath);
+            $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$filePath);
+        }else{
+            $this->updateAutomapConfigFiles($normalizedAutomapConfigs);
         }
 
 
@@ -104,6 +107,31 @@ class PublishMappedEnvKeys extends Command
 
         exit(1);
 
+    }
+
+
+    protected function updateAutomapConfigFiles(array $normalizedAutomapConfigs){
+
+        array_shift($normalizedAutomapConfigs);
+        foreach ($normalizedAutomapConfigs as $automapConfigPath=>$envKey){
+            $paths=ConfigMapper::getConfigFilePathFromConfigKeyString($automapConfigPath);
+
+            //maybe use Config::set ?
+            config([$automapConfigPath=>"env($envKey,'automap')"]);//dynamically updating until next request cycle.
+            //$temp = '<?php return ' . var_export(config($paths['config_string']), true) . ';';
+            $fileContent=File::get($paths['file_path']);
+            $linesArray=explode("\n", $fileContent);
+            foreach ($linesArray as $lineNumber=>$line) {
+                if(str_contains($line,"\"{$paths['key_in_file']}\"") || str_contains($line,"'{$paths['key_in_file']}'")){
+                    $line=str_replace("\"automap\"","env('$envKey','automap')",$line);
+                    $line=str_replace("'automap'","env('$envKey','automap')",$line);
+                    $linesArray[$lineNumber]=$line;
+
+                }
+            }
+
+            file_put_contents($paths['file_path'], implode($linesArray,"\n"));
+        }
     }
 
     private function prepareEnvString(array $normalizedAutomapConfigs){
@@ -126,7 +154,7 @@ class PublishMappedEnvKeys extends Command
         return true;
     }
 
-    private function outputMappedEnvKeys(array $normalizedAutomapConfigs){
+    protected function outputMappedEnvKeys(array $normalizedAutomapConfigs){
         $this->info('4. Copy this and paste it to your env, then edit values as you wish:');
         $outputString=''.$this->getBeginIndicatorForEnv()."\n";
         $outputString.=$this->prepareEnvString($normalizedAutomapConfigs);
@@ -138,7 +166,7 @@ class PublishMappedEnvKeys extends Command
         $this->warn("Don't forget to assign values to your env keys !");
     }
 
-    private function addMappedEnvKeysToFile(array $normalizedAutomapConfigs,string $filepath):bool{
+    protected function addMappedEnvKeysToFile(array $normalizedAutomapConfigs,string $filepath):bool{
         if($this->ensureFileExists($filepath)===false){
             $this->warn('Selected file path unavailable.');
             return false;

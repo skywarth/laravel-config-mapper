@@ -3,7 +3,9 @@
 namespace Skywarth\LaravelConfigMapper;
 
 
+use Illuminate\Support\Facades\File;
 use InvalidArgumentException;
+use OutOfBoundsException;
 
 class ConfigMapper
 {
@@ -82,6 +84,32 @@ class ConfigMapper
         $config=config();//this gives us all configs as Illuminate\Config\Repository. It includes subdirs too
         //alternative: Storage::allFiles(config_path());
         return $config->all();
+    }
+
+    public function getConfigFilePathFromConfigKeyString(string $configKeyString):array{
+        $configFileExtension='.php';
+        $configDir=config_path().'/';//every config must be under /config/
+        $explodedConfigParts=explode('.',$configKeyString);
+        $keyInFile=end($explodedConfigParts);
+        $iteration=0;
+        $path='';
+        do{
+            array_pop($explodedConfigParts);
+            $path=$configDir.implode('/',$explodedConfigParts).$configFileExtension;
+            if($path===base_path() || $iteration>100){
+                throw new OutOfBoundsException("Couldn't locate config");
+            }
+            $isConfigPathFile=File::exists($path);
+
+
+            $iteration++;
+        }while(!$isConfigPathFile);
+
+        return [
+            'file_path'=>$path,
+            'config_string'=>implode('.',$explodedConfigParts),
+            'key_in_file'=>$keyInFile
+        ];
     }
 
     //https://stackoverflow.com/a/29612139 thanks
