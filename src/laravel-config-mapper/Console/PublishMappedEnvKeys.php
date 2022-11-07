@@ -77,9 +77,8 @@ class PublishMappedEnvKeys extends Command
 
         $applyChoices=[
             1=>"Just output the mapped env keys, I'll copy them myself",
-            2=>"Add mapped env keys to .env.example file",
-            3=>"Add mapped env keys to .env file",
-            4=>"Update configs to replace 'automap' values with corresponding env keys",
+            2=>"Add mapped env keys to file",
+            3=>"Update configs to replace 'automap' values with corresponding env keys, then add mapped keys to file",
         ];
 
         $choiceString = $this->choice(
@@ -90,15 +89,12 @@ class PublishMappedEnvKeys extends Command
         if($choiceNumber===1){
             $this->outputMappedEnvKeys($normalizedAutomapConfigs);
         }else if($choiceNumber===2){
-            $filePath=base_path('.env.example');
-
-            $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$filePath);
+            $this->appendToFileOptionIO($normalizedAutomapConfigs);
         } else if($choiceNumber===3){
-            $filePath=base_path('.env');
-
-            $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$filePath);
-        }else{
             $this->updateAutomapConfigFiles($normalizedAutomapConfigs);
+            $this->appendToFileOptionIO($normalizedAutomapConfigs);
+        }else{
+            $this->error('Select a valid option next time numb-nut !');
         }
 
 
@@ -108,6 +104,9 @@ class PublishMappedEnvKeys extends Command
         exit(1);
 
     }
+
+
+
 
 
     protected function updateAutomapConfigFiles(array $normalizedAutomapConfigs){
@@ -164,6 +163,22 @@ class PublishMappedEnvKeys extends Command
         $this->line($outputString);
         $this->info('--------------COPY ABOVE--------------');
         $this->warn("Don't forget to assign values to your env keys !");
+    }
+
+    protected function appendToFileOptionIO(array $normalizedAutomapConfigs){
+        $outputFileOptions=[
+            1=>".env",
+            2=>".env.example",
+            3=>"laravel-config-mapper.env",
+        ];
+        $fileChoiceString = $this->choice(
+            "Append mapped env keys to which file ? (It'll append or overwrite mapped keys only, other data will be kept as it is) (Relative to base path)",
+            $outputFileOptions,
+        );
+        $filePath=base_path($fileChoiceString);
+
+
+        $this->addMappedEnvKeysToFile($normalizedAutomapConfigs,$filePath);
     }
 
     protected function addMappedEnvKeysToFile(array $normalizedAutomapConfigs,string $filepath):bool{
