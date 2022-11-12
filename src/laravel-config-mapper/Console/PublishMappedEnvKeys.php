@@ -38,10 +38,6 @@ class PublishMappedEnvKeys extends Command
     public function handle()
     {
 
-        /*$text = '<?php return ' . 'sssssssss' . ';';
-        file_put_contents(base_path('testzz.php'), $text);
-        dd('q');*/
-
         $this->info('Discovering config files');
 
         $configs=ConfigMapper::getAllConfigsArray();
@@ -82,7 +78,7 @@ class PublishMappedEnvKeys extends Command
         ];
 
         $choiceString = $this->choice(
-            'How would you like to apply mapped keys ?',
+            'How would you like to proceed ?',
             $applyChoices,
         );
         $choiceNumber=array_flip($applyChoices)[$choiceString];
@@ -110,13 +106,10 @@ class PublishMappedEnvKeys extends Command
 
 
     protected function updateAutomapConfigFiles(array $normalizedAutomapConfigs){
-
-        array_shift($normalizedAutomapConfigs);
         foreach ($normalizedAutomapConfigs as $automapConfigPath=>$envKey){
             $paths=ConfigMapper::getConfigFilePathFromConfigKeyString($automapConfigPath);
-
             //maybe use Config::set ?
-            config([$automapConfigPath=>"env($envKey,'automap')"]);//dynamically updating until next request cycle.
+            config([$automapConfigPath=>"env($envKey,'automap')"]);//dynamically updating until next request cycle. Not really necessary
             //$temp = '<?php return ' . var_export(config($paths['config_string']), true) . ';';
             $fileContent=File::get($paths['file_path']);
             $linesArray=explode("\n", $fileContent);
@@ -183,7 +176,7 @@ class PublishMappedEnvKeys extends Command
 
     protected function addMappedEnvKeysToFile(array $normalizedAutomapConfigs,string $filepath):bool{
         if($this->ensureFileExists($filepath)===false){
-            $this->warn('Selected file path unavailable.');
+            $this->error('Selected file path unavailable. Either create it yourself, or allow the command to create it. Also check file permissions if problem persists.');
             return false;
         }
 
@@ -221,7 +214,6 @@ class PublishMappedEnvKeys extends Command
             //replace between starting and ending tag
             $lineIterator=$beginLine+1;
 
-            //dump(['lineit'=>$lineIterator,'begin'=>$beginLine,'end'=>$endLine]);
             while(count($envStringToPutArray)>0){
                 $nextKeyToPut=array_shift($envStringToPutArray);
                 if($lineIterator===$endLine){
