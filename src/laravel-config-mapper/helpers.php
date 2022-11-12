@@ -1,6 +1,8 @@
 <?php
 
 
+use Skywarth\LaravelConfigMapper\Facades\ConfigMapper;
+
 if (! function_exists('configMapped')) {
     /**
      * Get the path to the application folder.
@@ -15,7 +17,7 @@ if (! function_exists('configMapped')) {
         if(config($string)!=='automap'){
             return config($string);
         }else{
-            return \ConfigMapper::getMappedConfig($string);
+            return ConfigMapper::getMappedConfig($string);
         }
     }
 }
