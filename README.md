@@ -9,7 +9,7 @@ Laravel Config Mapper is a package for assisting your project with the ability t
 You know the hassle. When defining a new configuration or adding to existing configuration, you have to give it a corresponding and appropriate env key. And if your config hierarchy has some depth, it is rather troublesome and prone to error. Laravel Config Mapper can help you mitigate this.
 
 ### Example Case
-
+    
 ```
 your-laravel-project/
 ├── config/
@@ -64,6 +64,50 @@ There is two distinct application methods for this package:
 
 ### <a name='map-env-keys-command'></a> Map the env keys by command
 
+This method is the recommended way of using this library.
+
+1. Put the value of `'automap'` for those configs that you'd like to map
+   1. e.g:
+      ```php
+      #./config/mammals/room/elephant.php
+      <?php
+        return [
+        'enabled'=>env('MAMMALS_ROOM_ELEPHANT_ENABLED',1),
+        'permissions'=>[
+            'allowed_to_walk'=>'automap' //NOTICE HERE
+            'allowed_to_sleep'=>env('MAMMALS_ROOM_ELEPHANT_PERMISSIONS_ALLOWED_TO_SLEEP',1)
+        ]
+      ];
+      ```
+2. Run the dedicated command: `php artisan laravel-config-mapper:publish-env-keys`
+   1. It'll discover your automap configs
+   2. After discovery, it'll prepare respective env keys for these
+   3. Then config path & env key pairs will be output
+   4. So far no change is made at all to your codebase
+3. Select an option on how you'd like to apply
+   1. Each option is explained down below
+
+#### "Just output the mapped env keys, I'll copy them myself"
+This option will just output the env keys that you'll have to use. Just as the name suggests, it doesn't alter any file at all in your codebase.
+After receiving the output from the console, you should paste the mapped env keys to your `.env` or wherever you like. Then you should replace all `'automap'` values in config with an `env()` helper function call. 
+
+For the example above, it would produce this output:
+```
+--------------COPY BELOW--------------
+#[AUTOMAP ENV KEYS BEGIN] - DON'T ALTER THIS LINE
+MAMMALS.ROOM.ELEPHANT.PERMISSIONS.ALLOWED_TO_WALK=
+#[AUTOMAP ENV KEYS END] - DON'T ALTER THIS LINE
+--------------COPY ABOVE--------------
+Don't forget to assign values to your env keys !
+
+```
+
+#### "Add mapped env keys to file"
+
+
+
+
+
 
 
 
@@ -104,7 +148,13 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 
 
 
+## Roadmap
 
+- Refactor the command
+- Make helper function registration optional through config
+- Unit tests, maybe ?
+- comment blocks for config file
+- Optionally remove redundant keywords from mapped env key. 
 
 
 
