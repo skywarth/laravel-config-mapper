@@ -1,12 +1,28 @@
-Warning: Documentation in progress. WIP for nerds
+*Proof reading for the documentation is pending*
 
 # Laravel Config Mapper
 
 Laravel Config Mapper is a package for assisting your project with the ability to **automatically map configs with env keys**. It is designed for Laravel framework.
 
+## Installation
+
+Run:
+```
+composer require guzzlehttp/guzzle
+```
+
+Optionally, you may publish the config, which allows you to tinker with libraries settings:
+```
+php artisan vendor:publish --provider="Skywarth\LaravelConfigMapper\LaravelConfigMapperServiceProvider" --tag="config"
+```
+
+
+
+
+
 ## Problem
 
-You know the hassle. When defining a new configuration or adding to existing configuration, you have to give it a corresponding and appropriate env key. And if your config hierarchy has some depth, it is rather troublesome and prone to error. Laravel Config Mapper can help you mitigate this.
+You know the hassle... When defining a new configuration or adding to existing configuration, you have to give it a corresponding and appropriate env key. And if your config hierarchy has some depth, it is rather troublesome and prone to error. Laravel Config Mapper can help you eliminate this.
 
 ### Example Case
     
@@ -61,13 +77,16 @@ There is two distinct application methods for this package:
 1. Map the env keys by command 
 2. Alternative config helper
 
+### TL;DR
+1. Put `'automap'` value for configs
+2. Run `php artisan laravel-config-mapper:publish-env-keys`
 
 ### <a name='map-env-keys-command'></a> Map the env keys by command
 
 This method is the recommended way of using this library.
 
 1. Put the value of `'automap'` for those configs that you'd like to map
-   1. e.g:
+   1. e.g: <a name='sample-application-of-automap'></a>Sample application of automap
       ```php
       #./config/mammals/room/elephant.php
       <?php
@@ -79,7 +98,7 @@ This method is the recommended way of using this library.
         ]
       ];
       ```
-2. Run the dedicated command: `php artisan laravel-config-mapper:publish-env-keys`
+2. Run the dedicated <a name='publish-env-keys-command'></a> command: `php artisan laravel-config-mapper:publish-env-keys`
    1. It'll discover your automap configs
    2. After discovery, it'll prepare respective env keys for these
    3. Then config path & env key pairs will be output
@@ -87,11 +106,11 @@ This method is the recommended way of using this library.
 3. Select an option on how you'd like to apply
    1. Each option is explained down below
 
-#### "Just output the mapped env keys, I'll copy them myself"
+#### 1. "Just output the mapped env keys, I'll copy them myself"
 This option will just output the env keys that you'll have to use. Just as the name suggests, it doesn't alter any file at all in your codebase.
 After receiving the output from the console, you should paste the mapped env keys to your `.env` or wherever you like. Then you should replace all `'automap'` values in config with an `env()` helper function call. 
 
-For the example above, it would produce this output:
+For the [example](#sample-application-of-automap) above, it would produce this output:
 ```
 --------------COPY BELOW--------------
 #[AUTOMAP ENV KEYS BEGIN] - DON'T ALTER THIS LINE
@@ -102,14 +121,67 @@ Don't forget to assign values to your env keys !
 
 ```
 
-#### "Add mapped env keys to file"
+#### <a name='add-mapped-env-keys-to-file'></a> 2. "Add mapped env keys to file"
+
+This option will print the mapped env keys into a file of your choice.
+Returning to the [example](#sample-application-of-automap), when we run the [command](#publish-env-keys-command) and chose this option, and pick `.env` as our target file, we can observe the change in `.env` file:
+
+```
+#.env file
+
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
 
 
+#[AUTOMAP ENV KEYS BEGIN] - DON'T ALTER THIS LINE
+MAMMALS.ROOM.ELEPHANT.PERMISSIONS.ALLOWED_TO_WALK=
+#[AUTOMAP ENV KEYS END] - DON'T ALTER THIS LINE
+```
+
+If automap env keys section present, the command will update the existing section. Otherwise it'll just append the section to the end of the file. 
+
+You can pick among these options as files:
+- .env
+- .env.example
+- laravel-config-mapper.env
+
+If the chosen file doesn't exist, the command will ask you if you'd like it to be created.
 
 
+#### 3. "Update configs to replace 'automap' values with corresponding env keys, then add mapped keys to file"
+
+This option allows you to be completely independent of config mapper library. It replaces any `'automap'` value placed in configs with appropriate mapped env keys. After that, it'll continue with the same procedure as ["Add mapped env keys to file"](#add-mapped-env-keys-to-file). 
+
+Recalling [example](#sample-application-of-automap), running [command](#publish-env-keys-command) with this choice will produce these changes:
+
+```php
+      #./config/mammals/room/elephant.php
+      <?php
+        return [
+        'enabled'=>env('MAMMALS_ROOM_ELEPHANT_ENABLED',1),
+        'permissions'=>[
+            'allowed_to_walk'=>env('MAMMALS.ROOM.ELEPHANT.PERMISSIONS.ALLOWED_TO_WALK','automap') //NOTICE HERE
+            'allowed_to_sleep'=>env('MAMMALS_ROOM_ELEPHANT_PERMISSIONS_ALLOWED_TO_SLEEP',1)
+        ]
+      ];
+```
+See the `'allowed_to_walk'` key, it had the value of `'automap'` prior to running the command, but now it is paired to an env key.
+
+And corresponding mapped env keys are added to `.env` file, how convenient. 
+
+```
+#.env file
+
+#[AUTOMAP ENV KEYS BEGIN] - DON'T ALTER THIS LINE
+MAMMALS.ROOM.ELEPHANT.PERMISSIONS.ALLOWED_TO_WALK=
+#[AUTOMAP ENV KEYS END] - DON'T ALTER THIS LINE
+```
 
 
-
+---
 
 ### <a name='alternative-config-helper'></a> Alternative Config Helper
 
@@ -128,7 +200,7 @@ return [
     ]
 ];
 ```
-You may have noticed that `enabled` and `allowed_to_walk` configs have the value of `'automap'`. This is due to the fact we are feeling lazy not don't want to ponder about some env key for it.
+You may have noticed that `enabled` and `allowed_to_walk` configs have the value of `'automap'`. This is due to the fact we are feeling lazy and don't want to ponder about some env key for it.
 
 Now run `php artisan laravel-config-mapper:publish-env-keys` command. In the command, when we select '[1] Just output the mapped env keys, I'll copy them myself' option, it outputs this:
 ```
@@ -150,6 +222,8 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 
 ## Roadmap
 
+- Table of content for readme
+- Assigned values for mapped env keys are lost when written :( Gotta find a way to preserve it
 - Refactor the command
 - Make helper function registration optional through config
 - Unit tests, maybe ?
@@ -162,4 +236,3 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 
 
 
-php artisan vendor:publish --provider="Skywarth\LaravelConfigMapper\LaravelConfigMapperServiceProvider" --tag="config"
