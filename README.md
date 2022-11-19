@@ -223,7 +223,7 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 ## Roadmap
 
 - Table of content for readme
-- Assigned values for mapped env keys are lost when written :( Gotta find a way to preserve it
+- ~~Assigned values for mapped env keys are lost when written :( Gotta find a way to preserve it~~
 - Refactor the command
 - Make helper function registration optional through config
 - Unit tests, maybe ?
