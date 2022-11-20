@@ -2,9 +2,23 @@
 
 # Laravel Config Mapper
 
+## Table of Contents
+
+- [Installation](#installation) 
+- [Problem Definition](#problem-definition)
+  - [Example case](#example-case)
+- [How to Use](#how-to-use)
+  - [TL;DR](#how-to-use-tl-dr)
+  - [Map the env keys by command](#map-env-keys-command)
+    - [Just output the mapped env keys](#map-env-keys-command-just-output)
+    - [Add mapped env keys to file](#map-env-keys-command-add-mapped-env-keys-to-file)
+    - [Update configs and replace](#map-env-keys-command-update-config)
+  - [Alternative Config Helper](#alternative-config-helper)
+- [Roadmap & TODOs](#roadmap-and-todos)
+
 Laravel Config Mapper is a package for assisting your project with the ability to **automatically map configs with env keys**. It is designed for Laravel framework.
 
-## Installation
+## <a name='installation'></a> Installation
 
 Run:
 ```
@@ -20,11 +34,11 @@ php artisan vendor:publish --provider="Skywarth\LaravelConfigMapper\LaravelConfi
 
 
 
-## Problem
+## <a name='problem-definition'></a> Problem Definition
 
 You know the hassle... When defining a new configuration or adding to existing configuration, you have to give it a corresponding and appropriate env key. And if your config hierarchy has some depth, it is rather troublesome and prone to error. Laravel Config Mapper can help you eliminate this.
 
-### Example Case
+### <a name='example-case'></a> Example Case
     
 ```
 your-laravel-project/
@@ -71,13 +85,13 @@ As you can see, it becomes cumbersome to name env keys after certain folder/path
 
 
 
-## How to use
+## <a name='how-to-use'></a> How to use
 
 There is two distinct application methods for this package:
 1. Map the env keys by command 
 2. Alternative config helper
 
-### TL;DR
+### <a name='how-to-use-tl-dr'></a> TL;DR
 1. Put `'automap'` value for configs
 2. Run `php artisan laravel-config-mapper:publish-env-keys`
 
@@ -106,7 +120,7 @@ This method is the recommended way of using this library.
 3. Select an option on how you'd like to apply
    1. Each option is explained down below
 
-#### 1. "Just output the mapped env keys, I'll copy them myself"
+#### <a name='map-env-keys-command-just-output'></a> 1. "Just output the mapped env keys, I'll copy them myself"
 This option will just output the env keys that you'll have to use. Just as the name suggests, it doesn't alter any file at all in your codebase.
 After receiving the output from the console, you should paste the mapped env keys to your `.env` or wherever you like. Then you should replace all `'automap'` values in config with an `env()` helper function call. 
 
@@ -121,7 +135,7 @@ Don't forget to assign values to your env keys !
 
 ```
 
-#### <a name='add-mapped-env-keys-to-file'></a> 2. "Add mapped env keys to file"
+#### <a name='map-env-keys-command-add-mapped-env-keys-to-file'></a> 2. "Add mapped env keys to file"
 
 This option will print the mapped env keys into a file of your choice.
 Returning to the [example](#sample-application-of-automap), when we run the [command](#publish-env-keys-command) and chose this option, and pick `.env` as our target file, we can observe the change in `.env` file:
@@ -151,9 +165,9 @@ You can pick among these options as files:
 If the chosen file doesn't exist, the command will ask you if you'd like it to be created.
 
 
-#### 3. "Update configs to replace 'automap' values with corresponding env keys, then add mapped keys to file"
+#### <a name='map-env-keys-command-update-config'></a> 3. "Update configs to replace 'automap' values with corresponding env keys, then add mapped keys to file"
 
-This option allows you to be completely independent of config mapper library. It replaces any `'automap'` value placed in configs with appropriate mapped env keys. After that, it'll continue with the same procedure as ["Add mapped env keys to file"](#add-mapped-env-keys-to-file). 
+This option allows you to be completely independent of config mapper library. It replaces any `'automap'` value placed in configs with appropriate mapped env keys. After that, it'll continue with the same procedure as ["Add mapped env keys to file"](#map-env-keys-command-add-mapped-env-keys-to-file). 
 
 Recalling [example](#sample-application-of-automap), running [command](#publish-env-keys-command) with this choice will produce these changes:
 
@@ -220,15 +234,15 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 
 
 
-## Roadmap
+## <a name='roadmap-and-todos'></a> Roadmap & TODOs
 
-- Table of content for readme
-- ~~Assigned values for mapped env keys are lost when written :( Gotta find a way to preserve it~~
-- Refactor the command
-- Make helper function registration optional through config
-- Unit tests, maybe ?
-- comment blocks for config file
-- Optionally remove redundant keywords from mapped env key. 
+- [X] ~~Table of content for readme~~
+- [X] ~~Assigned values for mapped env keys are lost when written :( Gotta find a way to preserve it~~
+- [ ] Refactor the command
+- [ ] Make helper function registration optional through config
+- [ ] Unit tests, maybe ?
+- [ ] comment blocks for config file
+- [ ] Optionally remove redundant keywords from mapped env key. 
 
 
 
