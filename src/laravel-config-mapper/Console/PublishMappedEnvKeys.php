@@ -189,15 +189,27 @@ class PublishMappedEnvKeys extends Command
 
         $beginLine=null;
         $endLine=null;
+        $existingMappedEnvValues=collect();
         foreach ($linesArray as $lineNumber=>$line){
-            if(str_contains($line,self::ENV_KEYS_BEGIN_INDICATOR)){
+            if(str_contains($line,self::ENV_KEYS_BEGIN_INDICATOR)){//finding the section start
                 $beginLine=$lineNumber;
-            }else if(str_contains($line,self::ENV_KEYS_END_INDICATOR)){
+            }else if(str_contains($line,self::ENV_KEYS_END_INDICATOR)){//finding the section end
                 $endLine=$lineNumber;
                 break;
             }
-        }
 
+            if(!is_null($beginLine) && $lineNumber!==$beginLine){
+                //determining assigned env values and storing them
+                $exploded=explode('=',$line,2);
+                if(count($exploded)==2 && $exploded[1]!=='' && $exploded[1]!==null){//intentionally didn't use !empty(), 0 is a valid value.
+                    $existingMappedEnvValues->push([
+                        'mapped_env_key'=>$exploded[0],
+                        'value'=>$exploded[1],
+                    ]);
+                }
+            }
+
+        }
 
         if(is_null($beginLine) && is_null($endLine)){
             $this->info("File doesn't contain mapped env keys, appending to the end of the file");
@@ -216,6 +228,12 @@ class PublishMappedEnvKeys extends Command
 
             while(count($envStringToPutArray)>0){
                 $nextKeyToPut=array_shift($envStringToPutArray);
+                $envKeyWithoutTrailingEqual=substr($nextKeyToPut,'0',-1);
+                if($existingMappedEnvValues->contains('mapped_env_key','=',$envKeyWithoutTrailingEqual)){
+                    //appending the existing value to the env key
+                    $nextKeyToPut.=$existingMappedEnvValues->firstWhere('mapped_env_key','=',$envKeyWithoutTrailingEqual)['value'];
+                }
+
                 if($lineIterator===$endLine){
                     array_splice($linesArray, $lineIterator, 0, $nextKeyToPut);
                     $endLine++;
