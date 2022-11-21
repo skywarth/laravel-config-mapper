@@ -67,6 +67,7 @@ class PublishMappedEnvKeys extends Command
 
         if (!$this->confirm('Is config paths and mapped env keys suitable ?')) {
             $this->warn("You should tinker with laravel-config-mapper's config to your liking. Then run this command again.");
+            exit (1);
         }
 
 
@@ -92,10 +93,6 @@ class PublishMappedEnvKeys extends Command
         }else{
             $this->error('Select a valid option next time numb-nut !');
         }
-
-
-
-
 
         exit(1);
 

@@ -22,7 +22,7 @@ Laravel Config Mapper is a package for assisting your project with the ability t
 
 Run:
 ```
-composer require guzzlehttp/guzzle
+composer require skywarth/laravel-config-mapper
 ```
 
 Optionally, you may publish the config, which allows you to tinker with libraries settings:
