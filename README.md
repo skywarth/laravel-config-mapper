@@ -2,6 +2,8 @@
 
 # Laravel Config Mapper
 
+Packagist: https://packagist.org/packages/skywarth/laravel-config-mapper
+
 ## Table of Contents
 
 - [Installation](#installation) 
@@ -239,7 +241,7 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 - [X] ~~Table of content for readme~~
 - [X] ~~Assigned values for mapped env keys are lost when written :( Gotta find a way to preserve it~~
 - [ ] Refactor the command
-- [ ] Make helper function registration optional through config
+- [X] ~~Make helper function registration optional through config~~
 - [ ] Unit tests, maybe ?
 - [ ] comment blocks for config file
 - [ ] Optionally remove redundant keywords from mapped env key. 
