@@ -83,40 +83,14 @@ class ConfigMapper
     }
 
     public function getMappedEnvKey($key):string{
-        $configPathSeparated=$this->separateConfigPath($key);
-        $foldersDelimiterApplied=$this->replaceFolderDelimiters($configPathSeparated['folder_only_path']);
-        $insideConfigDelimiterApplied=$this->replaceInsideConfigDelimiters($configPathSeparated['inside_config_path']);
+
+        $configPathSeparated=$this->getConfigFilePathFromConfigKeyString($key);
+
+        $foldersDelimiterApplied=$this->replaceFolderDelimiters($configPathSeparated['folder_only_config_key']);
+        $insideConfigDelimiterApplied=$this->replaceInsideConfigDelimiters($configPathSeparated['inside_file_only_config_key']);
         $key=$foldersDelimiterApplied.$this->getInsideConfigDelimiterCharacter().$insideConfigDelimiterApplied;
         $key=$this->replaceWordDelimiters($key);
         return strtoupper($key);
-    }
-
-
-    private function separateConfigPath($key):array{
-        //hold up this is kinda duplicate function, and even written worse. check getConfigFilePathFromConfigKeyString()
-        $exploded=explode('.',$key);
-        $configDir=config_path().'/';//every config must be under /config/
-        $folderOnlyPath='';
-        $insideConfigPath='';
-        foreach ($exploded as $pathFragment){
-            // careful, as of now of writing, File::exists returns true if the given path is FOLDER.
-            // If this changes, we should also check for folder as well
-            $folderOnlyPathFS=str_replace('.','/',$folderOnlyPath);//file system path
-            $lookupTarget=$configDir.$folderOnlyPathFS.$pathFragment;
-            $isFolderOrFile=File::exists($lookupTarget)
-                || File::exists($lookupTarget.'.php');
-            if($isFolderOrFile){
-                $folderOnlyPath.=$pathFragment.'.';
-            }else{
-                $insideConfigPath.=$pathFragment.'.';
-            }
-        }
-        $folderOnlyPath=substr($folderOnlyPath,0,-1);
-        $insideConfigPath=substr($insideConfigPath,0,-1);
-        return [
-            'folder_only_path'=>$folderOnlyPath,
-            'inside_config_path'=>$insideConfigPath
-        ];
     }
 
     private function replaceFolderDelimiters($key){
@@ -145,11 +119,13 @@ class ConfigMapper
         $configFileExtension='.php';
         $configDir=config_path().'/';//every config must be under /config/
         $explodedConfigParts=explode('.',$configKeyString);
-        $keyInFile=end($explodedConfigParts);
+        $lastKeyInFile=end($explodedConfigParts);
+        $keyInFile='';
         $iteration=0;
         $path='';
+        $popped=collect();
         do{
-            array_pop($explodedConfigParts);
+            $popped->push(array_pop($explodedConfigParts));
             $path=$configDir.implode('/',$explodedConfigParts).$configFileExtension;
             if($path===base_path() || $iteration>100){
                 throw new OutOfBoundsException("Couldn't locate config");
@@ -159,11 +135,15 @@ class ConfigMapper
 
             $iteration++;
         }while(!$isConfigPathFile);
+        $popped=$popped->reverse();
 
         return [
             'file_path'=>$path,
-            'config_string'=>implode('.',$explodedConfigParts),
-            'key_in_file'=>$keyInFile
+            'config_key'=>$configKeyString,
+            'folder_only_config_key'=>implode('.',$explodedConfigParts),//this is not used anywhere ?
+            'inside_file_only_config_key'=>$popped->implode('.'),
+            'last_key_in_file'=>$lastKeyInFile,
+
         ];
     }
 

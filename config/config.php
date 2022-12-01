@@ -17,7 +17,7 @@ return [
     | Rules:
     |   - Non alpha-numeric characters (except those that could mess up regex)
     |   - Has to be char (single character string)
-    |   - Suggested values: '.','/','@','-','#','|',')'
+    |   - Suggested values: '.'
     |   - Cannot have the same value with `word_delimiter_character`
     |
     */

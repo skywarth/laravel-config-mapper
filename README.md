@@ -245,6 +245,7 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 - [ ] Unit tests, maybe ?
 - [ ] comment blocks for config file
 - [ ] Optionally remove redundant keywords from mapped env key. 
+- [ ] Don't allow those keys that are not valid for dotenv files (*,-,|,@,#,),/ etc..)
 
 
 
