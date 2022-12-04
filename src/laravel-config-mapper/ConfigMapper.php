@@ -16,10 +16,52 @@ class ConfigMapper
      */
     public function __construct(array $configuration)
     {
-        if($configuration['folder_delimiter_character']===$configuration['word_delimiter_character']){
-            throw new InvalidArgumentException('Folder delimiter and word delimiter cannot be the same');
-        }
+        $this->validateConfiguration($configuration);
         $this->configuration = $configuration;
+    }
+
+    private function validateConfiguration(array $configuration){
+
+
+
+        $folderDelimiterCharacter=$configuration['delimiters']['folder_delimiter_character'];
+        $insideConfigDelimiterCharacter=$configuration['delimiters']['inside_config_delimiter_character'];
+        $wordDelimiterCharacter=$configuration['delimiters']['word_delimiter_character'];
+
+        if(
+            $folderDelimiterCharacter===$wordDelimiterCharacter
+            ||
+            $insideConfigDelimiterCharacter===$wordDelimiterCharacter
+        ){
+            // I don't recall why I added this to begin with, but it doesn't seem to cause havoc, so I'm commenting it out for now
+            //throw new InvalidArgumentException('folder_delimiter_character or inside_config_delimiter_character cannot be the same as word_delimiter_character !');
+        }
+
+        if(strlen($folderDelimiterCharacter)!==1 || strlen($insideConfigDelimiterCharacter)!==1){
+            throw new InvalidArgumentException('folder_delimiter_character and inside_config_delimiter_character configs has to be char ! (Single character string)');
+        }
+
+        if(strlen($wordDelimiterCharacter)>1){
+            throw new InvalidArgumentException("word_delimiter_character has to be a char or empty string ''. ");
+
+        }
+
+        if(
+            !(
+            $this->isValidEnvKeyCharacter($folderDelimiterCharacter) &&
+            $this->isValidEnvKeyCharacter($insideConfigDelimiterCharacter) &&
+            ($this->isValidEnvKeyCharacter($wordDelimiterCharacter) || strlen($wordDelimiterCharacter)===0)
+            )
+        ){
+            throw new InvalidArgumentException("Invalid character is used for delimiter characters in the config. Adjust your config or revert back to default config for this package. ");
+        }
+
+    }
+
+    private function isValidEnvKeyCharacter(string $char):bool{
+        $dotEnvValidNonLetters=['_','.'];//Unbelievable they don't expand this
+
+        return (in_array($char,$dotEnvValidNonLetters) || ctype_alnum($char));
     }
 
     /**
@@ -38,7 +80,18 @@ class ConfigMapper
      */
     public function getFolderDelimiterCharacter(): string
     {
-        return $this->configuration['folder_delimiter_character'];
+        return $this->configuration['delimiters']['folder_delimiter_character'];
+    }
+
+    /**
+     * Get the inside config delimiter character defined by the configuration.
+     * Inside config delimiter character is used for separating arrays and keys INSIDE the config, descending in the config.
+     *
+     * @return string
+     */
+    public function getInsideConfigDelimiterCharacter(): string
+    {
+        return $this->configuration['delimiters']['inside_config_delimiter_character'];
     }
 
     /**
@@ -50,7 +103,7 @@ class ConfigMapper
      */
     public function getWordDelimiterCharacter(): string
     {
-        return $this->configuration['word_delimiter_character'];
+        return $this->configuration['delimiters']['word_delimiter_character'];
     }
 
 
@@ -65,7 +118,12 @@ class ConfigMapper
     }
 
     public function getMappedEnvKey($key):string{
-        $key=$this->replaceFolderDelimiters($key);
+
+        $configPathSeparated=$this->getConfigFilePathFromConfigKeyString($key);
+
+        $foldersDelimiterApplied=$this->replaceFolderDelimiters($configPathSeparated['folder_only_config_key']);
+        $insideConfigDelimiterApplied=$this->replaceInsideConfigDelimiters($configPathSeparated['inside_file_only_config_key']);
+        $key=$foldersDelimiterApplied.$this->getInsideConfigDelimiterCharacter().$insideConfigDelimiterApplied;
         $key=$this->replaceWordDelimiters($key);
         return strtoupper($key);
     }
@@ -74,9 +132,15 @@ class ConfigMapper
         return str_replace('.',$this->getFolderDelimiterCharacter(),$key);
     }
 
+    private function replaceInsideConfigDelimiters($key){
+        return str_replace('.',$this->getInsideConfigDelimiterCharacter(),$key);
+    }
+
     private function replaceWordDelimiters($key){
         $key=Utility::camelToSnake($key);
-        return preg_replace("/[^a-zA-Z0-9{$this->getFolderDelimiterCharacter()}]/", $this->getWordDelimiterCharacter(), $key);
+        //how are '\\' working ??? Welp, as long as it does the job...
+        //I would really appreciate it if some regex pro would provide a better alternative to the query below
+        return preg_replace("/[^a-zA-Z0-9\\{$this->getFolderDelimiterCharacter()}\\{$this->getInsideConfigDelimiterCharacter()}]/", $this->getWordDelimiterCharacter(), $key);
     }
 
 
@@ -90,11 +154,13 @@ class ConfigMapper
         $configFileExtension='.php';
         $configDir=config_path().'/';//every config must be under /config/
         $explodedConfigParts=explode('.',$configKeyString);
-        $keyInFile=end($explodedConfigParts);
+        $lastKeyInFile=end($explodedConfigParts);
+        $keyInFile='';
         $iteration=0;
         $path='';
+        $popped=collect();
         do{
-            array_pop($explodedConfigParts);
+            $popped->push(array_pop($explodedConfigParts));
             $path=$configDir.implode('/',$explodedConfigParts).$configFileExtension;
             if($path===base_path() || $iteration>100){
                 throw new OutOfBoundsException("Couldn't locate config");
@@ -104,11 +170,15 @@ class ConfigMapper
 
             $iteration++;
         }while(!$isConfigPathFile);
+        $popped=$popped->reverse();
 
         return [
             'file_path'=>$path,
-            'config_string'=>implode('.',$explodedConfigParts),
-            'key_in_file'=>$keyInFile
+            'config_key'=>$configKeyString,
+            'folder_only_config_key'=>implode('.',$explodedConfigParts),//this is not used anywhere ?
+            'inside_file_only_config_key'=>$popped->implode('.'),
+            'last_key_in_file'=>$lastKeyInFile,
+
         ];
     }
 

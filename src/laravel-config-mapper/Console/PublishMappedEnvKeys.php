@@ -111,7 +111,7 @@ class PublishMappedEnvKeys extends Command
             $fileContent=File::get($paths['file_path']);
             $linesArray=explode("\n", $fileContent);
             foreach ($linesArray as $lineNumber=>$line) {
-                if(str_contains($line,"\"{$paths['key_in_file']}\"") || str_contains($line,"'{$paths['key_in_file']}'")){
+                if(str_contains($line,"\"{$paths['last_key_in_file']}\"") || str_contains($line,"'{$paths['last_key_in_file']}'")){
                     $line=str_replace("\"automap\"","env('$envKey','automap')",$line);
                     $line=str_replace("'automap'","env('$envKey','automap')",$line);
                     $linesArray[$lineNumber]=$line;
