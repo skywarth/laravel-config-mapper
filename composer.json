@@ -6,10 +6,7 @@
     "autoload": {
         "psr-4": {
             "Skywarth\\LaravelConfigMapper\\": "src/laravel-config-mapper"
-        },
-        "files": [
-            "src/laravel-config-mapper/helpers.php"
-        ]
+        }
     },
     "authors": [
         {

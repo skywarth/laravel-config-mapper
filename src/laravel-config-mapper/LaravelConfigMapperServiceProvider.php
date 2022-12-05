@@ -22,6 +22,8 @@ class LaravelConfigMapperServiceProvider extends ServiceProvider
         });
 
 
+
+
     }
 
     /**
@@ -41,6 +43,30 @@ class LaravelConfigMapperServiceProvider extends ServiceProvider
             $this->commands([
                 PublishMappedEnvKeys::class,
             ]);
+        }
+
+
+        $this->helperRegistration();//could be moved to register() I suppose
+
+    }
+
+
+    protected function helperRegistration(){
+        //Previously, helper file registration was in composer.json->autoload->files.
+        //But I opted for doing it by require_once, because it'll be registered by a condition
+        /*
+           "autoload": {
+                "psr-4": {
+                    "Skywarth\\LaravelConfigMapper\\": "src/laravel-config-mapper"
+                },
+                "files": [
+                    "src/laravel-config-mapper/helpers.php"
+                ]
+           },
+         */
+        if(config('laravel-config-mapper.register_helpers')===true){
+            $helperFilePath=__DIR__ . '/helpers.php';
+            require_once($helperFilePath);
         }
 
     }
