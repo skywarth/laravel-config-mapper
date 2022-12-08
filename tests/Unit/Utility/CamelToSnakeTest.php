@@ -42,6 +42,15 @@ class CamelToSnakeTest extends \Skywarth\LaravelConfigMapper\Tests\TestCase
         $this->assertEquals($expected,$result);
     }
 
+    public function test_two_word_special_character_string()
+    {
+        $sample='no!ceJo%';
+        $expected='no!ce_jo%';
+        $result=Utility::camelToSnake($sample,'_');
+
+        $this->assertEquals($expected,$result);
+    }
+
     public function test_multi_word_simple_string()
     {
         $sample='noiceJobDude';
@@ -50,6 +59,15 @@ class CamelToSnakeTest extends \Skywarth\LaravelConfigMapper\Tests\TestCase
 
         $this->assertEquals($expected,$result);
     }
+
+    /*public function test_multi_word_special_character_and_number_string()
+    { //NOPE
+        $sample='n0!ceJ0bD**e';
+        $expected='n_0!ce_j_0_b_d**e';
+        $result=Utility::camelToSnake($sample,'_');
+
+        $this->assertEquals($expected,$result);
+    }*/
 
     public function test_multi_word_simple_string_with_unseperated_words()
     {
@@ -60,7 +78,7 @@ class CamelToSnakeTest extends \Skywarth\LaravelConfigMapper\Tests\TestCase
         $this->assertEquals($expected,$result);
     }
 
-    public function test_case_sensitive_string()
+    public function test_case_sensitive_simple_string()
     {
         //to ensure it doesn't make a difference whether it is sent with capital letters or not
         $caseSensitiveSample='qUIckBrOWnFOxJuMpsOVer';//because it produces q_uick_br_own_fox_ju_mps_over

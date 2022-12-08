@@ -7,6 +7,7 @@ class Utility
 
     //https://stackoverflow.com/a/40514305 thanks
     public static function camelToSnake($string, $replaceWith = "#"):string {
+        //may provide unexpected results with numbers.
         return strtolower(preg_replace(
             '/(?<=\d)(?=[A-Za-z])|(?<=[A-Za-z])(?=\d)|(?<=[a-z])(?=[A-Z])/', $replaceWith, $string));
     }
