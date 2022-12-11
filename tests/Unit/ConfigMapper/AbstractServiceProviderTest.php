@@ -32,7 +32,11 @@ abstract class AbstractServiceProviderTest extends \Skywarth\LaravelConfigMapper
      */
 
     protected final function setConfigVariants(){
-        $standardConfigFlat=Utility::flatten($this->getConfigArray());
+        $configArray=$this->getConfigArray();
+        if(empty($configArray)){
+            return;
+        }
+        $standardConfigFlat=Utility::flatten($configArray);
 
         foreach ($standardConfigFlat as $key=>$value){
             Config::set($key,$value);
@@ -41,9 +45,7 @@ abstract class AbstractServiceProviderTest extends \Skywarth\LaravelConfigMapper
 
 
 
-    public function test_config_merge(){
 
-    }
 
 
 }
