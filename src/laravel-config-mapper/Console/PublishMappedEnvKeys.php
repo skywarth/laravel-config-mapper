@@ -13,7 +13,7 @@ class PublishMappedEnvKeys extends Command
 {
     protected $signature = 'laravel-config-mapper:publish-env-keys';
 
-    protected $description = '(pending description)';//TODO add description
+    protected $description = 'Command to publish mapped env keys via various distinct methods';
 
     private const ENV_KEYS_BEGIN_INDICATOR = '[AUTOMAP ENV KEYS BEGIN]';
     private const ENV_KEYS_END_INDICATOR = '[AUTOMAP ENV KEYS END]';
