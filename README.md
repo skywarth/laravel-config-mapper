@@ -243,6 +243,7 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 - [ ] Refactor the command
 - [X] ~~Make helper function registration optional through config~~
 - [ ] Unit tests, maybe ?
+- [ ] Code coverage
 - [X] ~~comment blocks for config file~~
 - [ ] Optionally remove redundant keywords from mapped env key. 
 - [X] ~~Don't allow those keys that are not valid for dotenv files (*,-,|,@,#,(,)),/,?,[,],`,`, etc.. Welp, **basically anything other than** [alphanumeric, `_` and `.`] is not accepted.)~~

@@ -42,6 +42,26 @@ class ServiceProviderConfigurationValidityTest extends AbstractServiceProviderTe
 */
 
 
+    /* VALIDS START */
+
+    public function test_standard_config_is_valid(){
+
+        $configuration=ConfigMapper::getConfiguration();
+        $this->assertIsArray($configuration);
+    }
+
+    public function test_alternative_config_is_valid(){
+        Config::set('laravel-config-mapper.delimiters.folder_delimiter_character','_');
+        Config::set('laravel-config-mapper.delimiters.inside_config_delimiter_character','.');
+        Config::set('laravel-config-mapper.delimiters.word_delimiter_character','');
+        $configuration=ConfigMapper::getConfiguration();
+        $this->assertIsArray($configuration);
+    }
+
+
+
+    /* VALIDS END */
+
 
     /* INVALIDS START */
     public function test_folder_delimiter_non_char_string(){
