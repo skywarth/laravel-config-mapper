@@ -75,7 +75,8 @@ class AcquireAutomapConfigsTest extends AbstractServiceProviderTest
         $targetConfigDir=config_path().'/mammals/room';
         $relativeConfigFile='elephant.php';
 
-
+        //MAYBE REFACTOR. YOU DEFINITELY GONNA NEED IT
+        //TODO: yeah refactor for sure, below function uses the almost exact same
         File::makeDirectory($targetConfigDir,0775,true);
         File::put($targetConfigDir.'/'.$relativeConfigFile,
             "
@@ -100,6 +101,43 @@ return [
         //TODO: we should unset/revert the config::set's that are assigned in the beginning. Is it really necessary ? Not sure.
     }
 
+
+    public function test_get_mapped_config(){
+        Config::set('laravel-config-mapper.delimiters.folder_delimiter_character','.');
+        Config::set('laravel-config-mapper.delimiters.inside_config_delimiter_character','.');
+        Config::set('laravel-config-mapper.delimiters.word_delimiter_character','');
+
+        $mappedEnvkey='MAMMALS.ROOM.ELEPHANT.PERMISSIONS.ALLOWEDTOWALK';
+        $expected='hello';
+        Config::set($mappedEnvkey,$expected);
+
+
+        $targetConfigDir=config_path().'/mammals/room';
+        $relativeConfigFile='elephant.php';
+
+        //MAYBE REFACTOR. YOU DEFINITELY GONNA NEED IT
+        File::makeDirectory($targetConfigDir,0775,true);
+        File::put($targetConfigDir.'/'.$relativeConfigFile,
+            "
+            <?php
+#asdad
+return [
+    'enabled'=>'automap',
+    'permissions'=>[
+        'allowed_to_walk'=>'automap',
+        'allowed_to_sleep'=>env('MAMMALS_ROOM_ELEPHANT_PERMISSIONS_ALLOWED_TO_SLEEP',1)
+    ]
+];
+            "
+        );
+        $this->assertFileExists($targetConfigDir.'/'.$relativeConfigFile);
+
+        $result=ConfigMapper::getMappedConfig('mammals.room.elephant.permissions.allowed_to_walk');
+        $this->assertEquals($expected,$result);
+
+        File::deleteDirectory(config_path().'/mammals',false);
+
+    }
 
 
 
