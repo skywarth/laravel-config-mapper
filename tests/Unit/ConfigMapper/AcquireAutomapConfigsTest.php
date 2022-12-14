@@ -140,5 +140,16 @@ return [
     }
 
 
+    public function test_get_mapped_env_key_out_of_bounds_exception()
+    {
+        Config::set('laravel-config-mapper.delimiters.folder_delimiter_character', '.');
+        Config::set('laravel-config-mapper.delimiters.inside_config_delimiter_character', '.');
+        Config::set('laravel-config-mapper.delimiters.word_delimiter_character', '');
+
+        $this->expectException(\OutOfBoundsException::class);
+
+        $mappedEnvKey=ConfigMapper::getMappedEnvKey('some.random.config.that-doesnt.exist');
+    }
+
 
 }
