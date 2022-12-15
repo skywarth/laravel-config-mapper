@@ -1,6 +1,6 @@
 <?php
 
-namespace Skywarth\LaravelConfigMapper\Tests\Unit\PublishMappedEnvKeys;
+namespace Skywarth\LaravelConfigMapper\Tests\Feature\PublishMappedEnvKeys;
 
 use Illuminate\Support\Facades\Config;
 use Skywarth\LaravelConfigMapper\Utility;
