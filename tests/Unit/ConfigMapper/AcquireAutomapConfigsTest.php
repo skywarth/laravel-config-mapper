@@ -45,6 +45,19 @@ class AcquireAutomapConfigsTest extends AbstractServiceProviderTest
         ];
     }
 
+    protected function createConfigFiles(): array
+    {
+        $deleteTargets=collect();
+        $deleteTargets->push($this->writeConfigFileToDirectory('mammals','panda','mammals.panda'));
+        $deleteTargets->push($this->writeConfigFileToDirectory('mammals','dog','mammals.dog'));
+        $deleteTargets->push($this->writeConfigFileToDirectory('non-mammals','penguin','non-mammals.penguin'));
+        $deleteTargets->push($this->writeConfigFileToDirectory('mammals/room','elephant','mammals.room.elephant'));
+
+        return $deleteTargets->toArray();
+    }
+
+
+
     public function test_get_all_configs(){
         $configs=ConfigMapper::getAllConfigsArray();
         $this->assertIsArray($configs);
@@ -72,33 +85,11 @@ class AcquireAutomapConfigsTest extends AbstractServiceProviderTest
         Config::set('laravel-config-mapper.delimiters.inside_config_delimiter_character','.');
         Config::set('laravel-config-mapper.delimiters.word_delimiter_character','');
 
-        $targetConfigDir=config_path().'/mammals/room';
-        $relativeConfigFile='elephant.php';
-
-        //MAYBE REFACTOR. YOU DEFINITELY GONNA NEED IT
-        //TODO: yeah refactor for sure, below function uses the almost exact same
-        File::makeDirectory($targetConfigDir,0775,true);
-        File::put($targetConfigDir.'/'.$relativeConfigFile,
-            "
-            <?php
-#asdad
-return [
-    'enabled'=>'automap',
-    'permissions'=>[
-        'allowed_to_walk'=>'automap',
-        'allowed_to_sleep'=>env('MAMMALS_ROOM_ELEPHANT_PERMISSIONS_ALLOWED_TO_SLEEP',1)
-    ]
-];
-            "
-        );
-        $expected='MAMMALS.ROOM.ELEPHANT.PERMISSIONS.ALLOWEDTOWALK';
-        $this->assertFileExists($targetConfigDir.'/'.$relativeConfigFile);
         $mappedEnvKey=ConfigMapper::getMappedEnvKey('mammals.room.elephant.permissions.allowed_to_walk');
+
+        $expected='MAMMALS.ROOM.ELEPHANT.PERMISSIONS.ALLOWEDTOWALK';
         $this->assertEquals($expected,$mappedEnvKey);
 
-        File::deleteDirectory(config_path().'/mammals',false);
-
-        //TODO: we should unset/revert the config::set's that are assigned in the beginning. Is it really necessary ? Not sure.
     }
 
 
@@ -112,30 +103,8 @@ return [
         Config::set($mappedEnvkey,$expected);
 
 
-        $targetConfigDir=config_path().'/mammals/room';
-        $relativeConfigFile='elephant.php';
-
-        //MAYBE REFACTOR. YOU DEFINITELY GONNA NEED IT
-        File::makeDirectory($targetConfigDir,0775,true);
-        File::put($targetConfigDir.'/'.$relativeConfigFile,
-            "
-            <?php
-#asdad
-return [
-    'enabled'=>'automap',
-    'permissions'=>[
-        'allowed_to_walk'=>'automap',
-        'allowed_to_sleep'=>env('MAMMALS_ROOM_ELEPHANT_PERMISSIONS_ALLOWED_TO_SLEEP',1)
-    ]
-];
-            "
-        );
-        $this->assertFileExists($targetConfigDir.'/'.$relativeConfigFile);
-
         $result=ConfigMapper::getMappedConfig('mammals.room.elephant.permissions.allowed_to_walk');
         $this->assertEquals($expected,$result);
-
-        File::deleteDirectory(config_path().'/mammals',false);
 
     }
 

@@ -11,14 +11,6 @@ use Skywarth\LaravelConfigMapper\Utility;
 class ServiceProviderConfigurationValidityTest extends AbstractServiceProviderTest
 {
 
-
-
-    protected function getConfigArray(): array
-    {
-        return [
-                //standard
-        ];
-    }
     /*
        public function test_config_merge(){
           $this->assertTrue(

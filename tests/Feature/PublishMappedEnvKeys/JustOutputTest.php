@@ -98,7 +98,6 @@ class JustOutputTest extends AbstractPublishMappedEnvKeys
             ->expectsOutput($outputString)
             ->expectsOutput('--------------COPY ABOVE--------------')
             ->assertSuccessful();
-        ;
     }
 
 
