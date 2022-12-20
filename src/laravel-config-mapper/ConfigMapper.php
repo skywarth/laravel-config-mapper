@@ -161,9 +161,11 @@ class ConfigMapper
         $popped=collect();
         do{
             $popped->push(array_pop($explodedConfigParts));
-            $path=$configDir.implode('/',$explodedConfigParts).$configFileExtension;
-            if($path===base_path() || $iteration>100){
-                throw new OutOfBoundsException("Couldn't locate config");
+            $pathWithoutExtension=$configDir.implode('/',$explodedConfigParts);
+            $path=$pathWithoutExtension.$configFileExtension;
+
+            if($pathWithoutExtension===$configDir || $pathWithoutExtension===base_path()  || $iteration>100){
+                throw new OutOfBoundsException("Couldn't locate config: last path ${pathWithoutExtension}, iteration ${iteration}");
             }
             $isConfigPathFile=File::exists($path);
 
