@@ -13,7 +13,7 @@ class PublishMappedEnvKeys extends Command
 {
     protected $signature = 'laravel-config-mapper:publish-env-keys';
 
-    protected $description = '(pending description)';//TODO add description
+    protected $description = 'Command to publish mapped env keys via various distinct methods';
 
     private const ENV_KEYS_BEGIN_INDICATOR = '[AUTOMAP ENV KEYS BEGIN]';
     private const ENV_KEYS_END_INDICATOR = '[AUTOMAP ENV KEYS END]';
@@ -67,7 +67,7 @@ class PublishMappedEnvKeys extends Command
 
         if (!$this->confirm('Is config paths and mapped env keys suitable ?')) {
             $this->warn("You should tinker with laravel-config-mapper's config to your liking. Then run this command again.");
-            exit (1);
+            return 1;
         }
 
 
@@ -92,9 +92,10 @@ class PublishMappedEnvKeys extends Command
             $this->appendToFileOptionIO($normalizedAutomapConfigs);
         }else{
             $this->error('Select a valid option next time numb-nut !');
+            return 1;
         }
 
-        exit(1);
+        return 0;
 
     }
 
