@@ -25,3 +25,8 @@ jobs:
       run: vendor/bin/phpunit
     - name: phpunit-coverage-badge
       uses: timkrase/phpunit-coverage-badge@v1.2.0
+      with:
+          coverage_badge_path: 'badge.svg'
+          push_badge: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+      
