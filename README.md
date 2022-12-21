@@ -1,3 +1,5 @@
+![Code Coverage Badge](./badge.svg) 
+
 *Proof reading for the documentation is pending*
 
 # Laravel Config Mapper
