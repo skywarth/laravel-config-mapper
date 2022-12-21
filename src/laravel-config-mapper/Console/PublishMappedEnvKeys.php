@@ -251,7 +251,7 @@ class PublishMappedEnvKeys extends Command
 
 
 
-        $newContent=implode($linesArray,"\n");
+        $newContent=implode("\n",$linesArray);
         file_put_contents($filepath,$newContent);
         return true;
 
