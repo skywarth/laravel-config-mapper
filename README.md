@@ -19,6 +19,7 @@ Packagist: https://packagist.org/packages/skywarth/laravel-config-mapper
     - [Update configs and replace](#map-env-keys-command-update-config)
   - [Alternative Config Helper](#alternative-config-helper)
 - [Roadmap & TODOs](#roadmap-and-todos)
+- [Credits & References](#credits-and-references)
 
 Laravel Config Mapper is a package for assisting your project with the ability to **automatically map configs with env keys**. It is designed for Laravel framework.
 
@@ -252,7 +253,11 @@ Marvelous, now we can just copy this string and paste it into `.env` file. After
 
 
 
+## <a name='credits-and-references'></a> Credits & References
+
+This project has been developed using JetBrains products. 
+Thanks for their [support for open-source development](https://www.jetbrains.com/community/opensource/#support).
 
 
-
-
+| <img width="150" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" alt="JetBrains Logo (Main) logo."> | <img width="200" src="https://resources.jetbrains.com/storage/products/company/brand/logos/PhpStorm.svg" alt="PhpStorm logo."> |
+|--------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
